@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
   "type": "datasource",
   "name": "Drasi SignalR",
-  "id": "yourname-drasi-signalr-datasource",
+  "id": "drasi-signalr",
   "category": "streaming",
   "info": {
     "description": "Real-time data streaming plugin that connects Grafana to Drasi SignalR endpoints for live dashboard updates",

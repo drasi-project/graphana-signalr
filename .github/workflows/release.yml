@@ -91,36 +91,14 @@ jobs:
           npx --yes @grafana/plugin-validator@latest -sourceCodeUri file://. ${{ steps.metadata.outputs.archive }}
 
       - name: Create GitHub release
-        id: create_release
-        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.metadata.outputs.github-tag }}
-          release_name: Release ${{ steps.metadata.outputs.github-tag }}
-          body_path: release_notes.md
-          draft: false
-          prerelease: false
-
-      - name: Add plugin to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ steps.metadata.outputs.archive }}
-          asset_name: ${{ steps.metadata.outputs.archive }}
-          asset_content_type: application/zip
-
-      - name: Add checksum to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ steps.metadata.outputs.archive-checksum }}
-          asset_name: ${{ steps.metadata.outputs.archive-checksum }}
-          asset_content_type: text/plain
+        run: |
+          gh release create ${{ steps.metadata.outputs.github-tag }} \
+            --title "Release ${{ steps.metadata.outputs.github-tag }}" \
+            --notes-file release_notes.md \
+            ./${{ steps.metadata.outputs.archive }} \
+            ./${{ steps.metadata.outputs.archive-checksum }}
 
       - name: Submit to Grafana.com
         uses: grafana/plugin-actions/build-plugin@release

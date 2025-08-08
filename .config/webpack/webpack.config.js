@@ -3,6 +3,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const LiveReloadPlugin = require('webpack-livereload-plugin');
+const ReplaceInFileWebpackPlugin = require('replace-in-file-webpack-plugin');
 
 const config = (env) => {
   const isDevelopment = env.development || process.env.NODE_ENV === 'development';
@@ -116,6 +117,22 @@ const config = (env) => {
           // { from: '../MANIFEST.txt', to: '.' }, // Removed to avoid signature issues
         ],
       }),
+      new ReplaceInFileWebpackPlugin([
+        {
+          dir: 'dist',
+          files: ['plugin.json'],
+          rules: [
+            {
+              search: '%VERSION%',
+              replace: require('../../package.json').version,
+            },
+            {
+              search: '%TODAY%',
+              replace: new Date().toISOString().substr(0, 10),
+            },
+          ],
+        },
+      ]),
       ...(isDevelopment ? [new LiveReloadPlugin()] : []),
       new ForkTsCheckerWebpackPlugin({
         async: isDevelopment,

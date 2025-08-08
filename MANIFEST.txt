@@ -1,0 +1,6 @@
+Hash: SHA256
+
+module.js:68134
+plugin.json:877
+README.md:1281
+img/logo.svg:260

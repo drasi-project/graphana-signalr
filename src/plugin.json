@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "datasource",
+  "name": "Drasi SignalR",
+  "id": "yourname-drasi-signalr-datasource",
+  "category": "streaming",
+  "info": {
+    "description": "Real-time data streaming plugin that connects Grafana to Drasi SignalR endpoints for live dashboard updates",
+    "author": {
+      "name": "Drasi Team",
+      "email": "support@drasi.io",
+      "url": "https://drasi.io"
+    },
+    "keywords": ["drasi", "signalr", "streaming", "real-time", "data-source", "websocket"],
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {
+        "name": "Documentation",
+        "url": "https://github.com/drasi-project/grafana-plugin"
+      },
+      {
+        "name": "GitHub",
+        "url": "https://github.com/drasi-project/grafana-plugin"
+      },
+      {
+        "name": "Drasi Project",
+        "url": "https://drasi.io/"
+      }
+    ],
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "includes": [],
+  "dependencies": {
+    "grafanaVersion": "8.0.0",
+    "plugins": []
+  },
+  "state": "alpha",
+  "streaming": true,
+  "backend": false
+}

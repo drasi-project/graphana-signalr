@@ -1,0 +1,128 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GRAFANA_ACCESS_POLICY_TOKEN: ${{ secrets.GRAFANA_ACCESS_POLICY_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and test plugin
+        run: |
+          npm run lint
+          npm run typecheck
+          npm run test:ci
+          npm run build
+
+      - name: Check for backend
+        id: check-for-backend
+        run: |
+          if [ -f "Magefile.go" ]
+          then
+            echo "has-backend=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build backend
+        if: steps.check-for-backend.outputs.has-backend == 'true'
+        uses: magefile/mage-action@v2
+        with:
+          version: latest
+          args: buildAll
+
+      - name: Sign plugin
+        run: npm run sign
+        if: ${{ env.GRAFANA_ACCESS_POLICY_TOKEN != '' }}
+
+      - name: Get plugin metadata
+        id: metadata
+        run: |
+          sudo apt-get install jq
+          
+          export GRAFANA_PLUGIN_ID=$(cat dist/plugin.json | jq -r .id)
+          export GRAFANA_PLUGIN_VERSION=$(cat dist/plugin.json | jq -r .info.version)
+          export GRAFANA_PLUGIN_TYPE=$(cat dist/plugin.json | jq -r .type)
+          export GRAFANA_PLUGIN_ARTIFACT=${GRAFANA_PLUGIN_ID}-${GRAFANA_PLUGIN_VERSION}.zip
+          export GRAFANA_PLUGIN_ARTIFACT_CHECKSUM=${GRAFANA_PLUGIN_ARTIFACT}.md5
+          
+          echo "plugin-id=${GRAFANA_PLUGIN_ID}" >> $GITHUB_OUTPUT
+          echo "plugin-version=${GRAFANA_PLUGIN_VERSION}" >> $GITHUB_OUTPUT
+          echo "plugin-type=${GRAFANA_PLUGIN_TYPE}" >> $GITHUB_OUTPUT
+          echo "archive=${GRAFANA_PLUGIN_ARTIFACT}" >> $GITHUB_OUTPUT
+          echo "archive-checksum=${GRAFANA_PLUGIN_ARTIFACT_CHECKSUM}" >> $GITHUB_OUTPUT
+
+          echo "github-tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+
+      - name: Read changelog
+        id: changelog
+        run: |
+          awk '/^## / { if (seen) exit; seen=1; next } seen { print }' CHANGELOG.md > release_notes.md
+
+      - name: Check package version
+        run: node -e "if (require('./package.json').version != require('./dist/plugin.json').info.version) {console.log('❌ Version mismatch'); process.exit(1)} else {console.log('✅ Versions match')}"
+
+      - name: Package plugin
+        id: package-plugin
+        run: |
+          mv dist ${{ steps.metadata.outputs.plugin-id }}
+          zip ${{ steps.metadata.outputs.archive }} ${{ steps.metadata.outputs.plugin-id }} -r
+          md5sum ${{ steps.metadata.outputs.archive }} > ${{ steps.metadata.outputs.archive-checksum }}
+          echo "checksum=$(cat ./${{ steps.metadata.outputs.archive-checksum }} | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Validate plugin
+        run: |
+          git clone https://github.com/grafana/plugin-validator
+          npx --yes @grafana/plugin-validator@latest -sourceCodeUri file://. ${{ steps.metadata.outputs.archive }}
+
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.metadata.outputs.github-tag }}
+          release_name: Release ${{ steps.metadata.outputs.github-tag }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+
+      - name: Add plugin to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ steps.metadata.outputs.archive }}
+          asset_name: ${{ steps.metadata.outputs.archive }}
+          asset_content_type: application/zip
+
+      - name: Add checksum to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ steps.metadata.outputs.archive-checksum }}
+          asset_name: ${{ steps.metadata.outputs.archive-checksum }}
+          asset_content_type: text/plain
+
+      - name: Submit to Grafana.com
+        uses: grafana/plugin-actions/build-plugin@release
+        if: ${{ env.GRAFANA_ACCESS_POLICY_TOKEN != '' }}
+        with:
+          policy_token: ${{ secrets.GRAFANA_ACCESS_POLICY_TOKEN }}
+          grafana_token: ${{ secrets.GRAFANA_COM_API_KEY }}

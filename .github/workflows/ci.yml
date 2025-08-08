@@ -105,6 +105,7 @@ jobs:
           echo "checksum=$(cat ./${{ steps.metadata.outputs.archive-checksum }} | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Validate plugin
+        if: ${{ env.GRAFANA_ACCESS_POLICY_TOKEN != '' }}
         run: |
           git clone https://github.com/grafana/plugin-validator
           npx --yes @grafana/plugin-validator@latest -sourceCodeUri file://. ${{ steps.metadata.outputs.archive }}

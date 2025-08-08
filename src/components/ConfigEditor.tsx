@@ -31,7 +31,7 @@ export function ConfigEditor(props: Props) {
           inputWidth={30}
           onChange={onSignalrUrlChange}
           value={jsonData.signalrUrl || ''}
-          placeholder="http://localhost:8002/hub"
+          placeholder="http://localhost:8080/hub"
           tooltip="The URL of the SignalR hub endpoint"
         />
       </div>

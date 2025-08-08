@@ -62,7 +62,7 @@ export function QueryEditor({ query, onChange, onRunQuery, datasource }: Props) 
           inputWidth={20}
           onChange={onQueryIdChange}
           value={query.queryId || ''}
-          placeholder="Enter query ID (e.g., freezerx)"
+          placeholder="Enter query ID (e.g., query-1)"
           tooltip="The query ID to monitor for changes"
         />
       </div>

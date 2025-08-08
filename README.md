@@ -1,12 +1,6 @@
 # Drasi SignalR Data Source Plugin
 
-[![CI](https://github.com/drasi-project/grafana-plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/drasi-project/grafana-plugin/actions/workflows/ci.yml)
-[![Release](https://github.com/drasi-project/grafana-plugin/actions/workflows/release.yml/badge.svg)](https://github.com/drasi-project/grafana-plugin/actions/workflows/release.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 A Grafana data source plugin that enables real-time streaming of data changes from Drasi SignalR endpoints. Perfect for building live dashboards that update automatically as your data changes.
-
-![Drasi SignalR Plugin Demo](docs/images/demo.gif)
 
 ## 🌟 Features
 
@@ -28,24 +22,19 @@ A Grafana data source plugin that enables real-time streaming of data changes fr
 
 ### Installation
 
-#### Option 1: Install from Grafana Plugin Catalog (Recommended)
+#### Option 1: Manual Installation
 
-1. Go to **Configuration** → **Plugins** in your Grafana instance
-2. Search for "Drasi SignalR"
-3. Click **Install**
-
-#### Option 2: Manual Installation
-
-1. Download the latest release from [GitHub Releases](https://github.com/drasi-project/grafana-plugin/releases)
+1. Download the latest release from [GitHub Releases](https://github.com/drasi-project/grafana-signalr/releases)
 2. Extract to your Grafana plugins directory
-3. Restart Grafana
+3. Enable `drasi-signalr` as an [unsigned plugin](https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#allow_loading_unsigned_plugins)
+4. Restart Grafana
 
-#### Option 3: Development Setup
+#### Option 2: Development Setup
 
 ```bash
 # Clone the repository
-git clone https://github.com/drasi-project/grafana-plugin.git
-cd grafana-plugin
+git clone https://github.com/drasi-project/grafana-signalr.git
+cd grafana-signalr
 
 # Install dependencies
 npm install
@@ -66,7 +55,7 @@ Access Grafana at http://localhost:3002 (admin/admin)
 1. Navigate to **Configuration** → **Data Sources**
 2. Click **Add data source**
 3. Search for "Drasi SignalR" and select it
-4. Configure the SignalR endpoint URL (e.g., `http://localhost:8002/hub`)
+4. Configure the SignalR endpoint URL (e.g., `http://localhost:8080/hub`)
 5. Click **Save & Test**
 
 ### 2. Create Query

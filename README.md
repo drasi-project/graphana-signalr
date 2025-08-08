@@ -246,7 +246,7 @@ DEBUG=* npm run dev
 
 ### Getting Help
 
-1. Check the [Issues](https://github.com/drasi-project/grafana-plugin/issues) page
+1. Check the [Issues](https://github.com/drasi-project/grafana-signalr/issues) page
 2. Review [Drasi Documentation](https://drasi.io/docs)
 3. Join our [Community Discord](https://discord.gg/drasi)
 
